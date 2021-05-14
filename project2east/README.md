@@ -1,7 +1,5 @@
 # AWS Websocket Messaging
 
-> This repo contains Serverless Framework project for a simple AWS Websocket chat app
-
 ### Setup
 
 > Install required npm packages first
