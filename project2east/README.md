@@ -1,5 +1,5 @@
 # AWS Websocket Messaging
-
+NOTE: The websocket is already live. No need for anyone else to deploy or run locally.
 ### Setup
 
 > Install required npm packages first
