@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.lamport.tla.toolbox.tool.tlc.modelCheck">
+    <stringAttribute key="configurationName" value="Model_SnapShot_1620660296835"/>
+    <intAttribute key="distributedFPSetCount" value="0"/>
+    <stringAttribute key="distributedNetworkInterface" value="192.168.86.186"/>
+    <intAttribute key="distributedNodesCount" value="1"/>
+    <stringAttribute key="distributedTLC" value="off"/>
+    <intAttribute key="fpIndex" value="45"/>
+    <intAttribute key="maxHeapSize" value="25"/>
+    <stringAttribute key="modelBehaviorInit" value=""/>
+    <stringAttribute key="modelBehaviorNext" value=""/>
+    <stringAttribute key="modelBehaviorSpec" value="Spec"/>
+    <intAttribute key="modelBehaviorSpecType" value="1"/>
+    <stringAttribute key="modelBehaviorVars" value="elections, messages, configuration, matchIndex, log, state, allLogs, commitIndex, currentTerm, votesResponded, nextIndex, votesGranted, voterLog, votedFor, serverQueue"/>
+    <stringAttribute key="modelComments" value=""/>
+    <booleanAttribute key="modelCorrectnessCheckDeadlock" value="true"/>
+    <listAttribute key="modelCorrectnessInvariants"/>
+    <listAttribute key="modelCorrectnessProperties"/>
+    <intAttribute key="modelEditorOpenTabs" value="8"/>
+    <stringAttribute key="modelExpressionEval" value=""/>
+    <listAttribute key="modelParameterConstants">
+        <listEntry value="AppendEntriesResponse;;{};0;0"/>
+        <listEntry value="Follower;;0;0;0"/>
+        <listEntry value="Leader;;2;0;0"/>
+        <listEntry value="Nil;;50;0;0"/>
+        <listEntry value="RequestVoteResponse;;{};0;0"/>
+        <listEntry value="Candidate;;1;0;0"/>
+        <listEntry value="RequestVoteRequest;;{};0;0"/>
+        <listEntry value="AppendEntriesRequest;;{};0;0"/>
+        <listEntry value="Server;;{1,2,3,4,5};0;0"/>
+        <listEntry value="Value;;;0;0"/>
+    </listAttribute>
+    <intAttribute key="modelVersion" value="20191005"/>
+    <intAttribute key="numberOfWorkers" value="4"/>
+    <stringAttribute key="result.mail.address" value=""/>
+    <stringAttribute key="specName" value="Raft"/>
+    <stringAttribute key="tlcResourcesProfile" value="local custom"/>
+</launchConfiguration>
