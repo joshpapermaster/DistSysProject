@@ -56,7 +56,7 @@ type CommandReq struct {
 var addr = flag.String("addr", "osavxvy2eg.execute-api.us-east-1.amazonaws.com", "http service address")
 var unique_id = "0"
 var unique_id_int = 0
-var numServers = 3
+var numServers = 4
 var N = 3 // N = Max number of servers allowed in the configuration
 var config = make(map[int]bool)
 var rf *Raft
@@ -137,7 +137,10 @@ func main() {
 				var response VoteReqResp
 				json.Unmarshal([]byte(message), &response)
 				// call RequestVoteReply
-				go rf.RequestVote(&response.Value)
+				if rf != nil {
+					go rf.RequestVote(&response.Value)
+				}
+
 
 			} else if response.Type=="RequestVoteReply"{
 				var response VoteReplyResp
@@ -152,7 +155,9 @@ func main() {
 				log.Printf("Receving heartbeat")
 				var response AppendEntriesResp
 				json.Unmarshal([]byte(message), &response)
-				go rf.AppendEntries(&response.Value)
+				if rf != nil {
+					go rf.AppendEntries(&response.Value)
+				}
 
 			} else if response.Type == "AppendEntriesReply" {
 				var response AppendEntriesReplyResp
@@ -166,20 +171,28 @@ func main() {
 			} else if response.Type == "Command" {
 				var response CommandReq
 				json.Unmarshal([]byte(message), &response)
-				go rf.Start(response.Value)
+				if rf != nil {
+					go rf.Start(response.Value)
+				}
 
 			} else if response.Type == "AliveCheck" {
 				i, _ := strconv.Atoi(response.Value[0])
-				temp := &Msg{Action: "onMessage", Audience: serverMap[i], Type: "AliveConfirm", Value: []string{unique_id}}
-			  err = c.WriteJSON(temp)
-			  if err != nil {
-			    log.Println("write:", err)
-			    return
-			  }
+				if (rf != nil && rf.Killed()) {
+					continue
+				} else {
+					temp := &Msg{Action: "onMessage", Audience: serverMap[i], Type: "AliveConfirm", Value: []string{unique_id}}
+				  err = c.WriteJSON(temp)
+				  if err != nil {
+				    log.Println("write:", err)
+				    return
+				  }
+				}
 
 			} else if response.Type == "AliveConfirm" {
 				i, _ := strconv.Atoi(response.Value[0])
-				go rf.AddServer(i)
+				if rf != nil {
+					go rf.AddServer(i)
+				}
 
 			} else if response.Type == "AddServer" {
 				// RESET config to be empty so it can be overwritten during heartbeat
@@ -189,6 +202,11 @@ func main() {
 			} else if response.Type == "Kill" {
 				go rf.Kill()
 
+			} else if response.Type == "KillServerI" {
+				i, _ := strconv.Atoi(response.Value[0])
+				if i == unique_id_int {
+					go rf.Kill()
+				}
 			}
 
 		}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"encoding/json"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -64,7 +65,15 @@ func main() {
     log.Println("write:", err)
     return
   }
-
+	go func() {
+		time.Sleep(5000 * time.Millisecond)
+		temp := &CommandMsg{Action: "onMessage", Audience: aud, Type: "KillServerI", Value: []string{"1"}}
+	  err = c.WriteJSON(temp)
+	  if err != nil {
+	    log.Println("write:", err)
+	    return
+	  }
+	}()
 	for {
     select {
 		case <-done:

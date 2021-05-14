@@ -1,61 +1,60 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
-	"encoding/json"
 	"strconv"
 	"sync/atomic"
 
-  // "time"
+	// "time"
 
 	"github.com/gorilla/websocket"
 )
 
 type Msg struct {
-  Action string `json:"action"`
-  Audience string `json:"audience"`
-  Type string `json:"type"`
-  Value []string `json:"value"`
+	Action   string   `json:"action"`
+	Audience string   `json:"audience"`
+	Type     string   `json:"type"`
+	Value    []string `json:"value"`
 }
 
 type Resp struct {
-	Type string
+	Type  string
 	Value []string
 }
 
 type VoteReqResp struct {
-	Type string
+	Type  string
 	Value RequestVoteArgs
 }
 
 type VoteReplyResp struct {
-	Type string
+	Type  string
 	Value RequestVoteReply
 }
 
 type AppendEntriesResp struct {
-	Type string
+	Type  string
 	Value AppendEntriesArgs
 }
 
 type AppendEntriesReplyResp struct {
-	Type string
+	Type  string
 	Value AppendEntriesReply
 }
 
 type CommandReq struct {
-	Type string
+	Type  string
 	Value interface{}
 }
 
-
 var addr = flag.String("addr", "osavxvy2eg.execute-api.us-east-1.amazonaws.com", "http service address")
-var unique_id = "1"
-var unique_id_int = 1
+var unique_id = "3"
+var unique_id_int = 3
 var numServers = 4
 var N = 3 // N = Max number of servers allowed in the configuration
 var config = make(map[int]bool)
@@ -64,7 +63,7 @@ var CurrentVoteReply RequestVoteReply
 var CurrentHBReply AppendEntriesReply
 
 func begin(serverMap []string, c *websocket.Conn) {
-  persister := MakePersister()
+	persister := MakePersister()
 	rf = Make(serverMap, unique_id_int, persister, c, N, config)
 }
 
@@ -75,7 +74,6 @@ func main() {
 	config[0] = true
 	config[1] = true
 	config[2] = true
-
 
 	flag.Parse()
 	log.SetFlags(0)
@@ -96,8 +94,8 @@ func main() {
 
 	go func() {
 		defer close(done)
-    serversFound := 0
-    serverMap := make([]string, numServers)
+		serversFound := 0
+		serverMap := make([]string, numServers)
 		for {
 			_, message, err := c.ReadMessage()
 			if err != nil {
@@ -107,33 +105,33 @@ func main() {
 			// aud = message["value"]
 			var response Resp
 			json.Unmarshal([]byte(message), &response)
-      log.Printf("recv: %s", message)
+			log.Printf("recv: %s", message)
 
-      if response.Type == "Introduction" {
-        i, _ := strconv.Atoi(response.Value[0])
-        // Check if it's a new server
-        if len(serverMap[i]) == 0 {
-          serversFound++
-          // New introduction so must introduce yourself
-          if response.Value[0] != unique_id {
-            temp := &Msg{Action: "onMessage", Audience: aud, Type: "Introduction", Value: []string{unique_id}}
-            err := c.WriteJSON(temp)
-            if err != nil {
-              log.Println("write:", err)
-              return
-            }
-          }
-          if serversFound == numServers && config[unique_id_int] {
-            // Ready to begin!
-            go begin(serverMap, c)
+			if response.Type == "Introduction" {
+				i, _ := strconv.Atoi(response.Value[0])
+				// Check if it's a new server
+				if len(serverMap[i]) == 0 {
+					serversFound++
+					// New introduction so must introduce yourself
+					if response.Value[0] != unique_id {
+						temp := &Msg{Action: "onMessage", Audience: aud, Type: "Introduction", Value: []string{unique_id}}
+						err := c.WriteJSON(temp)
+						if err != nil {
+							log.Println("write:", err)
+							return
+						}
+					}
+					if serversFound == numServers && config[unique_id_int] {
+						// Ready to begin!
+						go begin(serverMap, c)
 
-          }
-        }
-        // Regardless, overwrite the old configID value
-        serverMap[i] = response.Value[1]
-  			log.Printf("srvmap: %s", serverMap)
+					}
+				}
+				// Regardless, overwrite the old configID value
+				serverMap[i] = response.Value[1]
+				log.Printf("srvmap: %s", serverMap)
 
-      } else if response.Type=="RequestVote"{
+			} else if response.Type == "RequestVote" {
 				var response VoteReqResp
 				json.Unmarshal([]byte(message), &response)
 				// call RequestVoteReply
@@ -141,8 +139,7 @@ func main() {
 					go rf.RequestVote(&response.Value)
 				}
 
-
-			} else if response.Type=="RequestVoteReply"{
+			} else if response.Type == "RequestVoteReply" {
 				var response VoteReplyResp
 				json.Unmarshal([]byte(message), &response)
 				CurrentVoteReply.Term = response.Value.Term
@@ -177,15 +174,15 @@ func main() {
 
 			} else if response.Type == "AliveCheck" {
 				i, _ := strconv.Atoi(response.Value[0])
-				if (rf != nil && rf.Killed()) {
+				if rf != nil && rf.Killed() {
 					continue
 				} else {
 					temp := &Msg{Action: "onMessage", Audience: serverMap[i], Type: "AliveConfirm", Value: []string{unique_id}}
-				  err = c.WriteJSON(temp)
-				  if err != nil {
-				    log.Println("write:", err)
-				    return
-				  }
+					err = c.WriteJSON(temp)
+					if err != nil {
+						log.Println("write:", err)
+						return
+					}
 				}
 
 			} else if response.Type == "AliveConfirm" {
@@ -212,18 +209,18 @@ func main() {
 		}
 	}()
 
-  temp := &Msg{Action: "onMessage", Audience: aud, Type: "Introduction", Value: []string{unique_id}}
-  err = c.WriteJSON(temp)
-  if err != nil {
-    log.Println("write:", err)
-    return
-  }
+	temp := &Msg{Action: "onMessage", Audience: aud, Type: "Introduction", Value: []string{unique_id}}
+	err = c.WriteJSON(temp)
+	if err != nil {
+		log.Println("write:", err)
+		return
+	}
 
-  for {
-    select {
+	for {
+		select {
 		case <-done:
 			return
-    case <-interrupt:
+		case <-interrupt:
 			log.Println("interrupt")
 
 			// Cleanly close the connection by sending a close message and then
@@ -232,7 +229,7 @@ func main() {
 			if err != nil {
 				log.Println("write close:", err)
 			}
-      return
-    }
-  }
+			return
+		}
+	}
 }
